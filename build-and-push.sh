@@ -45,14 +45,14 @@ gcloud auth configure-docker "$GCP_REGION-docker.pkg.dev" --quiet
 # 4. Construcción de las imágenes Docker
 echo -e "\n${BLUE}[3/4] Construyendo imágenes de contenedores...${NC}"
 
-echo -e "${YELLOW}>> Construyendo [nginx-basic]...${NC}"
-docker build -t "$REGISTRY_PATH/nginx-basic:v1" ./nginx-basic
+echo -e "${YELLOW}>> Construyendo [01-nginx-basic]...${NC}"
+docker build -t "$REGISTRY_PATH/nginx-basic:v1" ./01-nginx-basic
 
-echo -e "${YELLOW}>> Construyendo [frontend-multi-stage] (React + Vite)...${NC}"
-docker build -t "$REGISTRY_PATH/frontend-multi-stage:v1" ./frontend-multi-stage
+echo -e "${YELLOW}>> Construyendo [02-frontend-multi-stage] (React + Vite)...${NC}"
+docker build -t "$REGISTRY_PATH/frontend-multi-stage:v1" ./02-frontend-multi-stage
 
-echo -e "${YELLOW}>> Construyendo [backend-fastapi] (FastAPI + Python)...${NC}"
-docker build -t "$REGISTRY_PATH/backend-fastapi:v1" ./backend-fastapi
+echo -e "${YELLOW}>> Construyendo [03-backend-fastapi] (FastAPI + Python)...${NC}"
+docker build -t "$REGISTRY_PATH/backend-fastapi:v1" ./03-backend-fastapi
 
 echo -e "${GREEN}[OK] Todas las imágenes se compilaron exitosamente.${NC}"
 

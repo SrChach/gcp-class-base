@@ -16,9 +16,9 @@ A lo largo de este laboratorio, recorreremos el siguiente temario:
 
 Encontrarás los siguientes archivos dentro de este repositorio:
 *   [.env.example](.env.example): Plantilla para estructurar y recordar tus variables locales de GCP.
-*   [nginx-basic/Dockerfile](nginx-basic/Dockerfile): Un contenedor web estático simple basado en Nginx.
-*   [frontend-multi-stage/Dockerfile](frontend-multi-stage/Dockerfile): Una aplicación React + Vite que utiliza compilaciones multietapa para optimizar su peso.
-*   [backend-fastapi/Dockerfile](backend-fastapi/Dockerfile): Una API backend dinámica en Python y FastAPI.
+*   [01-nginx-basic/Dockerfile](01-nginx-basic/Dockerfile): Un contenedor web estático simple basado en Nginx.
+*   [02-frontend-multi-stage/Dockerfile](02-frontend-multi-stage/Dockerfile): Una aplicación React + Vite que utiliza compilaciones multietapa para optimizar su peso.
+*   [03-backend-fastapi/Dockerfile](03-backend-fastapi/Dockerfile): Una API backend dinámica en Python y FastAPI.
 *   [.gitignore](.gitignore): Archivo para excluir credenciales locales (como el archivo `.env`) del control de versiones.
 *   [build-and-push.sh](build-and-push.sh): Script de Bash para automatización opcional una vez dominados los pasos manuales.
 
@@ -100,11 +100,11 @@ cp .env.example .env
 Revisemos las carpetas de este proyecto. Cada una contiene un enfoque de contenedorización distinto:
 
 ### Módulo 1: Servidor Web Básico Nginx
-*   **Ruta**: `nginx-basic/Dockerfile`
+*   **Ruta**: `01-nginx-basic/Dockerfile`
 *   **Qué hace**: Toma una imagen oficial y minimalista de Nginx basada en Alpine Linux, añade un saludo personalizado y expone el puerto HTTP estándar (80).
 
 ### Módulo 2: Frontend Multietapa (React + Vite)
-*   **Ruta**: `frontend-multi-stage/Dockerfile`
+*   **Ruta**: `02-frontend-multi-stage/Dockerfile`
 *   **Qué hace**: Dividimos la construcción del contenedor en dos etapas lógicas:
     1.  **Etapa 1 (builder)**: Se instala Node.js para compilar la aplicación React y generar archivos estáticos HTML/CSS/JS optimizados en la carpeta `/dist`.
     2.  **Etapa 2 (servidor)**: Se toma una imagen Nginx limpia y se copian únicamente los archivos compilados de la etapa anterior.
@@ -125,7 +125,7 @@ graph TD
 > Esta técnica evita incluir herramientas de desarrollo (como Node.js o carpetas de `node_modules` pesadas) en el contenedor final, logrando que sea sumamente liviano y mucho más seguro.
 
 ### Módulo 3: Backend con FastAPI (Python)
-*   **Ruta**: `backend-fastapi/Dockerfile`
+*   **Ruta**: `03-backend-fastapi/Dockerfile`
 *   **Qué hace**: Levanta un backend dinámico en Python. Copia e instala las dependencias definidas en `requirements.txt` y expone el puerto `8000` para recibir consultas HTTP de la API definida en `main.py`.
 
 ---
@@ -175,13 +175,13 @@ Construye cada una de tus imágenes de la siguiente manera:
 export REGISTRY_PATH="$REGION-docker.pkg.dev/$PROJECT_ID/$REPO_NAME"
 
 # 1. Compilar y etiquetar nginx-basic
-docker build -t "$REGISTRY_PATH/nginx-basic:v1" ./nginx-basic
+docker build -t "$REGISTRY_PATH/nginx-basic:v1" ./01-nginx-basic
 
 # 2. Compilar y etiquetar frontend-multi-stage (React)
-docker build -t "$REGISTRY_PATH/frontend-multi-stage:v1" ./frontend-multi-stage
+docker build -t "$REGISTRY_PATH/frontend-multi-stage:v1" ./02-frontend-multi-stage
 
 # 3. Compilar y etiquetar backend-fastapi (FastAPI)
-docker build -t "$REGISTRY_PATH/backend-fastapi:v1" ./backend-fastapi
+docker build -t "$REGISTRY_PATH/backend-fastapi:v1" ./03-backend-fastapi
 ```
 
 ### Paso 6: Validar tus Imágenes locales
