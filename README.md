@@ -15,6 +15,7 @@ A lo largo de este laboratorio, recorreremos el siguiente temario:
 ## 🏗️ Estructura del Proyecto
 
 Encontrarás los siguientes archivos dentro de este repositorio:
+*   [00-setup/README.md](00-setup/README.md): Guía e infraestructura como código (Terraform) para dar de alta accesos de forma aditiva.
 *   [.env.example](.env.example): Plantilla para estructurar y recordar tus variables locales de GCP.
 *   [01-nginx-basic/Dockerfile](01-nginx-basic/Dockerfile): Un contenedor web estático simple basado en Nginx.
 *   [02-frontend-multi-stage/Dockerfile](02-frontend-multi-stage/Dockerfile): Una aplicación React + Vite que utiliza compilaciones multietapa para optimizar su peso.

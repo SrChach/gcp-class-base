@@ -1,0 +1,19 @@
+# Reemplaza con el ID de tu proyecto de Google Cloud
+project_id = "tu-proyecto-id-gcp"
+
+# Opcional: puedes sobreescribir el rol por defecto si lo deseas (roles/viewer)
+# role       = "roles/editor"
+
+# Lista de correos institucionales de los miembros del equipo que serán dados de alta
+users = [
+  "afmontiela@liverpool.com.mx",
+  "avavilas@liverpool.com.mx",
+  "cbautistac02@liverpool.com.mx",
+  "ccabrerag01@liverpool.com.mx",
+  "ezununp@liverpool.com.mx",
+  "jigudinoh@liverpool.com.mx",
+  "lrlopezg@liverpool.com.mx",
+  "panchopistolasgru@gmail.com",
+  "rarreolas@liverpool.com.mx",
+  "rserranom@liverpool.com.mx"
+]
