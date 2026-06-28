@@ -21,3 +21,11 @@ venv/
 ENV/
 env/
 .pytest_cache/
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.backup
+*.tfvars
+.terraform.lock.hcl
+
