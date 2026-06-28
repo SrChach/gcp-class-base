@@ -1,206 +1,218 @@
-# Guía de Introducción Práctica a GCP: Contenedores y Registro de Artifacts 🚀
+# ¡Hola, Ingeniero/a GCP! 👋
 
-Esta guía interactiva y práctica está diseñada para estudiantes de sistemas de nivel universitario intermedio. Su objetivo es aprender los conceptos de **Docker**, **Compilaciones Multietapa (Multi-Stage Builds)**, y cómo interactuar con **Google Cloud Platform (GCP)** para almacenar imágenes de contenedores de manera segura en **Google Artifact Registry**.
+¡Te damos la bienvenida a tu guía práctica sobre contenedores y despliegues en la nube! En esta aventura vas a aprender conceptos fundamentales sobre **Docker**, compilaciones optimizadas multietapa (**Multi-Stage builds**), y cómo interactuar de forma manual y directa con los servicios de **Google Cloud Platform (GCP)** para almacenar imágenes listas para producción en **Google Artifact Registry**.
+
+A lo largo de este laboratorio, recorreremos el siguiente temario:
+
+1.  **Configuración del Entorno**: Preparación de herramientas y configuración de tu identidad de Git.
+2.  **Análisis de los Contenedores**: Inspección y entendimiento del código de tres tipos diferentes de Dockerfiles.
+3.  **Compilación y Etiquetado Manual**: Construcción local de imágenes Docker paso a paso.
+4.  **Autenticación y Subida a GCP**: Configuración de seguridad y publicación en Artifact Registry.
+5.  **Verificación Final**: Validación en la consola en la nube.
 
 ---
 
 ## 🏗️ Estructura del Proyecto
 
-El repositorio está organizado con los siguientes componentes principales:
-*   [gcp-class/.env.example](file:///home/zombyegru/gcp-class/.env.example): Archivo de plantilla para configurar tus variables locales.
-*   [gcp-class/nginx-basic/Dockerfile](file:///home/zombyegru/gcp-class/nginx-basic/Dockerfile): Demostración de un contenedor web estático básico usando Nginx.
-*   [gcp-class/frontend-multi-stage/Dockerfile](file:///home/zombyegru/gcp-class/frontend-multi-stage/Dockerfile): Frontend en React + Vite compilado usando compilación multietapa.
-*   [gcp-class/backend-fastapi/Dockerfile](file:///home/zombyegru/gcp-class/backend-fastapi/Dockerfile): API Backend desarrollada con FastAPI y Python.
-*   [gcp-class/.gitignore](file:///home/zombyegru/gcp-class/.gitignore): Configuración para excluir archivos locales del control de versiones.
+Encontrarás los siguientes archivos dentro de este repositorio:
+*   [.env.example](.env.example): Plantilla para estructurar y recordar tus variables locales de GCP.
+*   [nginx-basic/Dockerfile](nginx-basic/Dockerfile): Un contenedor web estático simple basado en Nginx.
+*   [frontend-multi-stage/Dockerfile](frontend-multi-stage/Dockerfile): Una aplicación React + Vite que utiliza compilaciones multietapa para optimizar su peso.
+*   [backend-fastapi/Dockerfile](backend-fastapi/Dockerfile): Una API backend dinámica en Python y FastAPI.
+*   [.gitignore](.gitignore): Archivo para excluir credenciales locales (como el archivo `.env`) del control de versiones.
+*   [build-and-push.sh](build-and-push.sh): Script de Bash para automatización opcional una vez dominados los pasos manuales.
 
 ---
 
-## 📊 Arquitectura del Flujo de Trabajo
+## 📊 Ciclo de Vida del Laboratorio
 
-El siguiente diagrama muestra el ciclo de vida completo de esta práctica: desde la clonación del repositorio local hasta el push a la nube de GCP.
+El siguiente diagrama muestra el flujo que realizarás en este ejercicio práctico:
 
 ```mermaid
 flowchart TD
-    A[Estudiante en Cloud Shell] -->|1. Configurar .env| B(Código Local en Workspace)
-    B -->|2. Compilar Contenedores| C{Imágenes Docker}
-    C -->|nginx-basic| C1[Nginx Simple]
-    C -->|frontend-multi-stage| C2[React Multietapa]
-    C -->|backend-fastapi| C3[FastAPI Backend]
-    
-    B -->|3. Autenticación Docker| D[gcloud Credentials]
-    C1 & C2 & C3 -->|4. Subir Imágenes| E[Google Artifact Registry]
+    A[Clonar Repo] --> B[Configurar Git e Identidad]
+    B --> C[Definir Variables de Entorno en Terminal]
+    C --> D[Construir Imágenes con Docker]
+    D --> E[Autenticar Docker con GCP]
+    E --> F[Push de Imágenes a Artifact Registry]
 ```
 
 ---
 
-## 1. ⚙️ Dependencias y Prerrequisitos
+## 1. ⚙️ Prerrequisitos del Entorno
 
-Antes de comenzar, asegúrate de cumplir con los siguientes requisitos en el entorno de desarrollo.
+Para realizar esta práctica con éxito, asegúrate de estar conectado a tu proyecto de GCP.
 
-### A. Cuenta y Proyecto de GCP
-1.  **Acceso al Proyecto**: Asegúrate de tener una invitación activa a un proyecto de GCP existente o crea un proyecto nuevo desde la [Consola de Google Cloud](https://console.cloud.google.com).
-2.  **Verificación desde la Consola**: Ve a la consola web y asegúrate de que el proyecto está seleccionado en el panel superior.
-3.  **Listar Proyectos vía CLI**:
-    Puedes verificar el proyecto configurado actualmente en tu terminal con:
+### A. Proyecto de GCP
+1.  **Proyecto Activo**: Asegúrate de tener asignado un ID de proyecto de Google Cloud.
+2.  **Verificación**: Abre tu consola web y confirma que el proyecto está seleccionado. Desde tu terminal de Cloud Shell, ejecuta:
     ```bash
     gcloud config list project
     ```
-    O ver todos tus proyectos asociados con:
+    Si no es el ID de proyecto esperado, cámbialo usando:
     ```bash
-    gcloud projects list
+    gcloud config set project TU_PROJECT_ID
     ```
 
-### B. Herramientas CLI preinstaladas en Cloud Shell
-Dado que estamos utilizando **Google Cloud Shell**, las siguientes herramientas clave ya vienen preinstaladas y configuradas:
-
-*   **Docker**: Motor para construir y ejecutar contenedores.
-*   **Git**: Sistema de control de versiones.
-*   **CLI de GCP (`gcloud`)**: Herramienta de comandos para gestionar recursos de GCP.
-*   **Herramienta para Cloud Storage (`gsutil` / `gcloud storage`)**:
-    *   *Comando clásico*: `gsutil ls` (Lista los buckets y objetos del proyecto).
-    *   *Comando moderno (actualizado)*: 
+### B. Herramientas del Sistema (Preinstaladas en Cloud Shell)
+*   **Docker**: Motor para la creación de contenedores.
+*   **Git**: Control de versiones de código.
+*   **CLI de GCP (`gcloud`)**: Para administrar tus recursos en la nube.
+*   **Herramienta para Cloud Storage**: 
+    *   *Comando actualizado recomendado*:
         ```bash
         gcloud storage ls
         ```
-*   **Herramienta para BigQuery (`bq`)**: Herramienta de línea de comandos para consultar y administrar datasets. Puedes ver su estado inicial con:
+*   **Herramienta para BigQuery (`bq`)**: Ejecuta este comando para confirmar que tienes acceso:
     ```bash
     bq ls
     ```
 
 ---
 
-## 2. 👥 Configuración Inicial y Repositorio Git
-
-El flujo inicia configurando el repositorio git y las variables de entorno de tu máquina local/Cloud Shell.
+## 2. 👥 Configuración Inicial de Git
 
 ### A. Clonar el repositorio
-El estudiante clonará este repositorio en su entorno de trabajo local:
+Si aún no estás en el directorio de trabajo, clona el proyecto e ingresa a él:
 ```bash
-git clone <URL_DEL_REPOSITORIO_REMOTO> gcp-class
+git clone <URL_DEL_REPOSITORIO> gcp-class
 cd gcp-class
 ```
 
-### B. Crear y Configurar el Archivo `.env`
-Copia la plantilla de variables de entorno y complétala con tus datos específicos del proyecto de GCP y tus datos de estudiante:
+### B. Configurar tus Datos en Git
+Antes de realizar cualquier cambio en el repositorio, establece tu firma en la configuración local:
+```bash
+git config --local user.name "Tu Nombre Completo"
+git config --local user.email "tu-correo-personal@ejemplo.com"
+```
+
+### C. Configurar tus Variables de Sesión
+Crea una copia de la plantilla `.env` para usarla como block de notas local de tus variables de GCP:
 ```bash
 cp .env.example .env
 ```
-Abre el archivo `.env` recién creado y configúralo según tu entorno:
-*   `GCP_PROJECT_ID`: ID del proyecto que vas a utilizar en GCP.
-*   `GCP_REGION`: Región geográfica donde crearás el Artifact Registry (por ejemplo, `us-central1`).
-*   `GCP_ARTIFACT_REPO`: Nombre del repositorio de Artifact Registry (por ejemplo, `gcp-class-repo`).
-
-### C. Configurar Git con tus Datos
-Para que tus commits queden registrados correctamente:
-```bash
-# Carga las variables de entorno configuradas
-export $(cat .env | xargs)
-
-# Aplica la configuración local de git
-git config --local user.name "$GIT_USER_NAME"
-git config --local user.email "$GIT_USER_EMAIL"
-```
+*(Edita el archivo `.env` con un editor de texto si necesitas recordar tus configuraciones más adelante).*
 
 ---
 
-## 3. 🐳 Inspección y Análisis de Dockerfiles
+## 3. 🐳 Conociendo los Contenedores (Dockerfiles)
 
-Veamos en detalle los tres tipos de arquitecturas de contenedores que utilizaremos.
+Revisemos las carpetas de este proyecto. Cada una contiene un enfoque de contenedorización distinto:
 
-### Módulo A: Servidor Web Estático Básico (Nginx)
-*   **Ubicación**: [nginx-basic/Dockerfile](file:///home/zombyegru/gcp-class/nginx-basic/Dockerfile)
-*   **Concepto**: Es el uso estándar de Docker. Tomamos una imagen existente de un servidor web listo para producción, sobreescribimos su archivo estático básico de inicio y exponemos el puerto HTTP (80).
+### Módulo 1: Servidor Web Básico Nginx
+*   **Ruta**: `nginx-basic/Dockerfile`
+*   **Qué hace**: Toma una imagen oficial y minimalista de Nginx basada en Alpine Linux, añade un saludo personalizado y expone el puerto HTTP estándar (80).
 
-### Módulo B: Frontend Multietapa (React + Vite)
-*   **Ubicación**: [frontend-multi-stage/Dockerfile](file:///home/zombyegru/gcp-class/frontend-multi-stage/Dockerfile)
-*   **Concepto**: Las compilaciones multietapa (Multi-Stage Builds) nos permiten dividir el `Dockerfile` en secciones independientes para optimizar el tamaño de la imagen final.
+### Módulo 2: Frontend Multietapa (React + Vite)
+*   **Ruta**: `frontend-multi-stage/Dockerfile`
+*   **Qué hace**: Dividimos la construcción del contenedor en dos etapas lógicas:
+    1.  **Etapa 1 (builder)**: Se instala Node.js para compilar la aplicación React y generar archivos estáticos HTML/CSS/JS optimizados en la carpeta `/dist`.
+    2.  **Etapa 2 (servidor)**: Se toma una imagen Nginx limpia y se copian únicamente los archivos compilados de la etapa anterior.
 
 ```mermaid
 graph TD
-    subgraph Etapa 1: Compilador (Node.js)
-        A[Instalar Dependencias de Desarrollo] --> B[Compilar React/Vite con npm run build]
-        B --> C[Resultado: Archivos HTML/JS/CSS estáticos en /dist]
+    subgraph Etapa 1: Compilador (NodeJS)
+        A[Descarga Dependencias] --> B[npm run build]
+        B --> C[Archivos compilados /dist]
     end
-    
-    subgraph Etapa 2: Servidor (Nginx Alpine)
-        D[Servidor web básico y liviano] --> E[Copiar archivos de /dist al servidor]
+    subgraph Etapa 2: Producción (Nginx)
+        D[Servidor web limpio] --> E[Servir carpeta /dist]
     end
-
     C -->|Copiar solo lo necesario| E
 ```
 
-> [!TIP]
-> **¿Por qué usar Multi-Stage?** Evitamos meter herramientas pesadas como Node.js, `npm`, o carpetas enormes como `node_modules` en la imagen que se envía a producción. Esto reduce drásticamente el tamaño (de ~500MB a menos de 30MB) y mitiga vulnerabilidades de seguridad.
+> [!NOTE]
+> Esta técnica evita incluir herramientas de desarrollo (como Node.js o carpetas de `node_modules` pesadas) en el contenedor final, logrando que sea sumamente liviano y mucho más seguro.
 
-### Módulo C: Backend con Código Local (FastAPI + Python)
-*   **Ubicación**: [backend-fastapi/Dockerfile](file:///home/zombyegru/gcp-class/backend-fastapi/Dockerfile)
-*   **Concepto**: Levantamos un servidor web backend dinámico usando Python, FastAPI y Uvicorn. Copiamos el archivo de dependencias `requirements.txt` e instalamos las librerías necesarias de forma óptima, exponiendo la API en el puerto `8000`.
+### Módulo 3: Backend con FastAPI (Python)
+*   **Ruta**: `backend-fastapi/Dockerfile`
+*   **Qué hace**: Levanta un backend dinámico en Python. Copia e instala las dependencias definidas en `requirements.txt` y expone el puerto `8000` para recibir consultas HTTP de la API definida en `main.py`.
 
 ---
 
-## 4. 🚀 Compilación y Push a Google Artifact Registry
+## 4. 🚀 Compilación y Despliegue Manual (Paso a Paso)
 
-Una vez comprendido el código, es hora de construir nuestras imágenes y subirlas a la nube de GCP.
+Ahora, realizarás la compilación, etiquetado y subida a la nube de manera manual para entender la anatomía de cada comando.
 
-### Paso 1: Habilitar la API de Artifact Registry en GCP
-Para que nuestro proyecto de GCP pueda almacenar las imágenes, debemos asegurarnos de tener la API activa:
+### Paso 1: Definir tus variables locales en la terminal
+Exporta estas variables para evitar escribirlas manualmente en cada línea posterior:
 ```bash
-# Carga las variables nuevamente por seguridad
-export $(cat .env | xargs)
-
-# Habilita el servicio de Artifact Registry en el proyecto
-gcloud services enable artifactregistry.googleapis.com --project="$GCP_PROJECT_ID"
+export PROJECT_ID="tu-proyecto-id-gcp"
+export REGION="us-central1"
+export REPO_NAME="gcp-class-repo"
 ```
 
-### Paso 2: Crear el Repositorio de Contenedores en GCP
-Crea un repositorio de formato Docker en la región de tu preferencia:
+### Paso 2: Habilitar la API de Artifact Registry
+Habilita el servicio de Google Cloud para poder crear registros de imágenes:
 ```bash
-gcloud artifacts repositories create "$GCP_ARTIFACT_REPO" \
+gcloud services enable artifactregistry.googleapis.com --project="$PROJECT_ID"
+```
+
+### Paso 3: Crear el Repositorio de Contenedores en GCP
+Crea tu propio repositorio de contenedores con formato Docker:
+```bash
+gcloud artifacts repositories create "$REPO_NAME" \
     --repository-format=docker \
-    --location="$GCP_REGION" \
-    --description="Repositorio de contenedores de clase de GCP" \
-    --project="$GCP_PROJECT_ID"
+    --location="$REGION" \
+    --description="Repositorio de clase para imágenes Docker" \
+    --project="$PROJECT_ID"
 ```
 
-### Paso 3: Configurar Autenticación de Docker
-Permite que el cliente local de Docker se autentique automáticamente contra la nube de Google Cloud para subir las imágenes:
+### Paso 4: Autenticar Docker local con GCP
+Configura la seguridad para permitir que tu Docker local se comunique con Artifact Registry:
 ```bash
-gcloud auth configure-docker "$GCP_REGION-docker.pkg.dev"
+gcloud auth configure-docker "$REGION-docker.pkg.dev"
 ```
-*(Confirma con `y` si solicita la modificación en los archivos de configuración local de Docker)*
+*(Si te solicita confirmación, responde con `Y` y pulsa Enter).*
 
-### Paso 4: Construir y Etiquetar las Imágenes
-La nomenclatura obligatoria para etiquetar imágenes en Artifact Registry es:
+### Paso 5: Compilar y Etiquetar las Imágenes
+Para poder subir una imagen a Google Artifact Registry, debes etiquetarla con un nombre que contenga el servidor regional, el ID de proyecto y el nombre del repositorio:
 `REGIONAL-docker.pkg.dev/PROJECT_ID/REPOSITORY_NAME/IMAGE_NAME:TAG`
 
-Ejecutemos la compilación de cada módulo:
-
+Construye cada una de tus imágenes de la siguiente manera:
 ```bash
-# Definimos el prefijo común para Artifact Registry
-REGISTRY_PATH="$GCP_REGION-docker.pkg.dev/$GCP_PROJECT_ID/$GCP_ARTIFACT_REPO"
+# Definimos el prefijo de ruta de GCP
+export REGISTRY_PATH="$REGION-docker.pkg.dev/$PROJECT_ID/$REPO_NAME"
 
-# 1. Compilar nginx-basic
+# 1. Compilar y etiquetar nginx-basic
 docker build -t "$REGISTRY_PATH/nginx-basic:v1" ./nginx-basic
 
-# 2. Compilar frontend-multi-stage (React)
+# 2. Compilar y etiquetar frontend-multi-stage (React)
 docker build -t "$REGISTRY_PATH/frontend-multi-stage:v1" ./frontend-multi-stage
 
-# 3. Compilar backend-fastapi (Python)
+# 3. Compilar y etiquetar backend-fastapi (FastAPI)
 docker build -t "$REGISTRY_PATH/backend-fastapi:v1" ./backend-fastapi
 ```
 
-### Paso 5: Listar Imágenes Locales
-Puedes verificar que tus imágenes se construyeron y etiquetaron correctamente:
+### Paso 6: Validar tus Imágenes locales
+Verifica que las tres imágenes están guardadas en tu lista de imágenes locales de Docker:
 ```bash
 docker images
 ```
 
-### Paso 6: Hacer Push de las Imágenes a GCP
-Sube las imágenes construidas al Artifact Registry de Google Cloud:
+### Paso 7: Subir (Push) las imágenes a Artifact Registry
+Sube cada una de tus imágenes al repositorio en la nube que creaste en GCP:
 ```bash
 docker push "$REGISTRY_PATH/nginx-basic:v1"
 docker push "$REGISTRY_PATH/frontend-multi-stage:v1"
 docker push "$REGISTRY_PATH/backend-fastapi:v1"
 ```
 
-¡Excelente! Al ingresar a la consola web de GCP y navegar a **Artifact Registry**, verás tus tres imágenes de contenedor cargadas con la etiqueta `:v1` listas para ser desplegadas en servicios como Cloud Run o GKE.
+---
+
+## 5. 🔍 Verificación Final
+
+Para confirmar que las imágenes están cargadas con éxito:
+1.  Abre la consola de GCP y dirígete al menú de **Artifact Registry**.
+2.  Entra en tu repositorio `gcp-class-repo`.
+3.  Comprueba que figuran las imágenes de tus tres módulos y que todas poseen la etiqueta `:v1`.
+
+¡Felicitaciones! Has completado con éxito la dockerización y el almacenamiento en la nube de tus servicios. 🎉
+
+---
+
+## 🤖 Alternativa Avanzada (Referencia)
+Si ya dominas los pasos manuales anteriores y deseas acelerar el ciclo de desarrollo en el futuro, puedes automatizar todo el proceso cargando tu archivo `.env` y ejecutando el script proporcionado:
+```bash
+./build-and-push.sh
+```
