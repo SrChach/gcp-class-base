@@ -22,6 +22,7 @@ variable "users" {
     "lrlopezg@liverpool.com.mx",
     "panchopistolasgru@gmail.com",
     "rarreolas@liverpool.com.mx",
-    "rserranom@liverpool.com.mx"
+    "rserranom@liverpool.com.mx",
+    "gsikmo@gmail.com"
   ]
 }
