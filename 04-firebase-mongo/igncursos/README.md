@@ -75,19 +75,33 @@ Accede a la interfaz administrativa en `http://localhost:3000/admin`.
 
 ## ☁️ Despliegue en Google Cloud
 
-### 1. Compilación y Subida a Artifact Registry
-```bash
-export PROJECT_ID="tu-project-id"
-export REGION="northamerica-south1"
-export REPO_NAME="cloud-run-source-deploy"
-export IMAGE_TAG="${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPO_NAME}/payload-cms:v1"
+### Método Recomendado: Usando `Makefile`
+Puedes compilar, subir a Artifact Registry y desplegar en Cloud Run en un solo comando:
 
-gcloud builds submit --tag "$IMAGE_TAG" .
+```bash
+make deploy-all
 ```
 
-### 2. Despliegue en Google Cloud Run
+### Comandos Individuales con `make`:
+* **`make help`**: Muestra la lista de comandos disponibles.
+* **`make gcp-build`**: Compila y sube la imagen a Artifact Registry (`igncursos:v1`).
+* **`make gcp-deploy`**: Despliega el servicio `igncursos` en Cloud Run inyectando las variables de `.env`.
+
+---
+
+### Método Manual (Vía `gcloud` CLI)
+
 ```bash
-gcloud run deploy payload-cms \
+export PROJECT_ID="clases-gcp-500802"
+export REGION="northamerica-south1"
+export REPO_NAME="cloud-run-source-deploy"
+export IMAGE_TAG="${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPO_NAME}/igncursos:v1"
+
+# 1. Compilar y subir a Artifact Registry
+gcloud builds submit --tag "$IMAGE_TAG" .
+
+# 2. Despliegue en Google Cloud Run
+gcloud run deploy igncursos \
   --image="$IMAGE_TAG" \
   --platform=managed \
   --region="$REGION" \
