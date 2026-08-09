@@ -96,9 +96,23 @@ Desarrollo de las páginas públicas y de reproducción utilizando *Server Compo
 
 ---
 
-## 🚀 Fase 5 (Avanzado): Integración de WebAssembly (WASM) & Rust
+## ⚡ Fase 5: Escalado y Caché Persistente en Cloud Run (Tráfico Medio/Alto)
 
-*(Esta fase es opcional y avanzada. Se ejecuta una vez que la aplicación sea 100% funcional con librerías estándar de Next.js).*
+*(Nota: Para tráfico bajo a medio, la caché local de Next.js dentro del contenedor activo funciona 100% bien y sin configuraciones extra).*
+
+### 1. Opción 1: Google Cloud CDN / Firebase Hosting en el Borde
+* **Propósito**: Servir las páginas compiladas del catálogo desde la red de borde global de Google (<20 ms).
+* **Mecanismo**: Next.js envía cabeceras `Cache-Control: s-maxage=3600, stale-while-revalidate`. Cloud CDN guarda el HTML en el borde y responde a los estudiantes sin despertar instancias adicionales de Cloud Run (costo cercano a $0).
+
+### 2. Opción 2: Redis Compartido (`cacheHandler` de Next.js)
+* **Propósito**: Compartir la caché de datos entre múltiples contenedores de Cloud Run o hacerla persistir tras un escalado a cero.
+* **Mecanismo**: Configurar `cacheHandler` en `next.config.ts` conectado a un servidor Redis (Upstash o Google Cloud Memorystore).
+
+---
+
+## 🚀 Fase 6 (Avanzado): Integración de WebAssembly (WASM) & Rust
+
+*(Esta fase es opcional y avanzada. Se ejecuta únicamente cuando la aplicación requiera procesamiento o encriptación pesada de video).*
 
 ### 1. Procesamiento de Video con `FFmpeg.wasm` (C/Rust a WASM)
 * **Propósito**: Procesar, recortar o generar miniaturas (*thumbnails*) de videos subidos directamente desde el servidor Node.js o navegador cliente sin depender de binarios instalados en el sistema operativo.
