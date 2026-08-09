@@ -1,3 +1,4 @@
+import { gcsStorage } from '@payloadcms/storage-gcs'
 import { mongooseAdapter } from '@payloadcms/db-mongodb'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import path from 'path'
@@ -28,5 +29,15 @@ export default buildConfig({
     url: process.env.DATABASE_URL || '',
   }),
   sharp,
-  plugins: [],
+  plugins: [
+    gcsStorage({
+      collections: {
+        media: {
+          prefix: process.env.GCS_PREFIX || 'webcourses',
+        },
+      },
+      bucket: process.env.GCS_BUCKET || 'igncursos-media',
+      options: {},
+    }),
+  ],
 })
