@@ -15,6 +15,9 @@ GAR_REPO_NAME    ?= cloud-run-source-deploy
 RUN_SERVICE_NAME ?= igncursos
 IMAGE_NAME       ?= igncursos
 IMAGE_TAG        ?= v1
+SERVICE_ACCOUNT  ?= igncursos-sa@$(PROJECT_ID).iam.gserviceaccount.com
+GCS_BUCKET       ?= igncursos-media
+GCS_PREFIX       ?= webcourses
 
 FULL_IMAGE_URI   := $(REGION)-docker.pkg.dev/$(PROJECT_ID)/$(GAR_REPO_NAME)/$(IMAGE_NAME):$(IMAGE_TAG)
 
@@ -47,8 +50,9 @@ gcp-deploy: ## Despliega el contenedor a Cloud Run inyectando variables del .env
 		--image="$(FULL_IMAGE_URI)" \
 		--platform=managed \
 		--region="$(REGION)" \
+		--service-account="$(SERVICE_ACCOUNT)" \
 		--allow-unauthenticated \
 		--port=3000 \
-		--set-env-vars="DATABASE_URL=$(DATABASE_URL),PAYLOAD_SECRET=$(PAYLOAD_SECRET)"
+		--set-env-vars="DATABASE_URL=$(DATABASE_URL),PAYLOAD_SECRET=$(PAYLOAD_SECRET),GCS_BUCKET=$(GCS_BUCKET),GCS_PREFIX=$(GCS_PREFIX)"
 
 deploy-all: gcp-build gcp-deploy ## Compila, sube a Artifact Registry y despliega en Cloud Run (Todo en 1)
