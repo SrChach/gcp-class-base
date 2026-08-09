@@ -17,7 +17,9 @@
 
 * **Node.js**: versión `v20.9.0` o superior.
 * **Gestor de paquetes**: `npm` o `pnpm`.
-* **Docker & Docker Compose**: (Opcional) para pruebas y despliegue contenerizado local.
+* **Google Cloud SDK (`gcloud` CLI)**: Autenticado (`gcloud auth login`) y configurado en el proyecto objetivo (`clases-gcp-500802`).
+* **GNU Make**: *(Opcional)* Para automatizar comandos mediante `Makefile`. Requiere entorno Linux/POSIX (Cloud Shell, Linux, macOS, WSL2 o Git Bash) debido al uso de herramientas del sistema (`sed`, `grep`, `awk`).
+* **Docker & Docker Compose**: *(Opcional)* Para pruebas y validación del ejecutable de producción local.
 * **Instancia de Firestore Database**: Configurada en modo API MongoDB con autenticación SCRAM-SHA-256.
 
 ---
@@ -58,18 +60,13 @@ PAYLOAD_SECRET=tu-clave-secreta-payload
 
 ---
 
-## 🐳 Ejecución con Docker
+## 🐳 Validación del Compilado de Producción con Docker
 
-### Compilación y Ejecución Local
-El proyecto cuenta con un `Dockerfile` multietapa optimizado (`deps`, `builder`, `runner`) que empaqueta únicamente la salida `standalone` de Next.js.
+> 💡 **Nota**: Los comandos `build-*` ejecutan la compilación de **producción (`standalone`)**. Se utilizan para **validar que el ejecutable esté 100% funcional y listo para desplegar** a Google Cloud Run antes de realizar el push.
 
-Para levantar el entorno contenerizado localmente:
-
-```bash
-docker compose up --build
-```
-
-Accede a la interfaz administrativa en `http://localhost:3000/admin`.
+* **`make build-up`**: Compila en modo producción y levanta los contenedores en `http://localhost:3000/admin` (equivale a `docker compose up --build`).
+* **`make build-down`**: Detiene y limpia los contenedores locales (equivale a `docker compose down`).
+* **`make build-image`**: Compila únicamente la imagen Docker localmente para validar el build.
 
 ---
 
@@ -84,6 +81,7 @@ make deploy-all
 
 ### Comandos Individuales con `make`:
 * **`make help`**: Muestra la lista de comandos disponibles.
+* **`make dev`**: Inicia el servidor local con Hot Reload (`npm run dev`).
 * **`make gcp-build`**: Compila y sube la imagen a Artifact Registry (`igncursos:v1`).
 * **`make gcp-deploy`**: Despliega el servicio `igncursos` en Cloud Run inyectando las variables de `.env`.
 
@@ -94,15 +92,17 @@ make deploy-all
 ```bash
 export PROJECT_ID="clases-gcp-500802"
 export REGION="northamerica-south1"
-export REPO_NAME="cloud-run-source-deploy"
-export IMAGE_TAG="${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPO_NAME}/igncursos:v1"
+export GAR_REPO_NAME="cloud-run-source-deploy"
+export RUN_SERVICE_NAME="igncursos"
+export IMAGE_TAG="v1"
+export FULL_IMAGE_URI="${REGION}-docker.pkg.dev/${PROJECT_ID}/${GAR_REPO_NAME}/igncursos:${IMAGE_TAG}"
 
 # 1. Compilar y subir a Artifact Registry
-gcloud builds submit --tag "$IMAGE_TAG" .
+gcloud builds submit --tag "$FULL_IMAGE_URI" .
 
 # 2. Despliegue en Google Cloud Run
-gcloud run deploy igncursos \
-  --image="$IMAGE_TAG" \
+gcloud run deploy "$RUN_SERVICE_NAME" \
+  --image="$FULL_IMAGE_URI" \
   --platform=managed \
   --region="$REGION" \
   --allow-unauthenticated \

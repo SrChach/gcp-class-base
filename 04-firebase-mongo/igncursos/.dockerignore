@@ -1,0 +1,16 @@
+# Excluir carpetas y archivos pesados o locales del contexto de Docker
+node_modules
+.next
+.git
+.gitignore
+README.md
+Dockerfile
+docker-compose.yml
+Makefile
+coverage
+test-results
+playwright-report
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.env*.local
