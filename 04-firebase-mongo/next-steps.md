@@ -59,17 +59,31 @@ Desarrollo de las páginas públicas y de reproducción utilizando *Server Compo
 
 ---
 
-## ⚡ Fase 3: Optimización y Consulta de Datos
+## ⚡ Fase 3: Optimización de Modelado y Consulta en MongoDB
 
-* **Payload Local API**: Consultar datos directamente desde Node.js en los Server Components sin sobrecarga HTTP:
+### 1. Modelado Específico para MongoDB
+* **Estrategia Documental de Embebido**: Para vistas de lectura ultra rápidas, las lecciones pueden incrustarse como un arreglo de subdocumentos en `Courses`. Con **1 sola lectura BSON** a MongoDB se recupera el curso completo con su temario sin realizar búsquedas relacionales (`$lookup`).
+* **Indexación B-Tree (`index: true`)**: Agregar `index: true` y `unique: true` en los campos `slug` de `Courses`, `Lessons` y `Categories` para búsquedas en tiempo $O(1)$.
+
+### 2. Consultas Eficientes con Payload Local API
+* **Control de Profundidad (`depth`)**: Ajustar `depth: 1` o `depth: 0` para evitar que MongoDB traiga relaciones anidadas innecesarias al listar el catálogo.
+* **Proyección de Campos (`select`)**: Recuperar únicamente los campos requeridos por la vista:
   ```typescript
   import { getPayload } from 'payload'
   import config from '@payload-config'
 
   const payload = await getPayload({ config })
-  const courses = await payload.find({ collection: 'courses' })
+  const courses = await payload.find({
+    collection: 'courses',
+    depth: 1,
+    select: {
+      title: true,
+      slug: true,
+      coverImage: true,
+    },
+  })
   ```
-* **Imágenes y CDN**: Aprovechar la optimización de imágenes nativa de Next.js (`<Image>`) configurando las rutas de media de Payload.
+* **Caché en Next.js**: Combinar la Local API con `unstable_cache` o `revalidate` para servir el catálogo en milisegundos desde memoria.
 
 ---
 
@@ -78,3 +92,20 @@ Desarrollo de las páginas públicas y de reproducción utilizando *Server Compo
 * Diseño moderno en Modo Oscuro con colores elegantes.
 * Tipografía limpia desde Google Fonts (ej: *Inter* u *Outfit*).
 * Transiciones y animaciones fluidas para tarjetas y reproductores de video.
+* Reproducción HTML5 estándar (`<video>`) y librerías maduras de Next.js.
+
+---
+
+## 🚀 Fase 5 (Avanzado): Integración de WebAssembly (WASM) & Rust
+
+*(Esta fase es opcional y avanzada. Se ejecuta una vez que la aplicación sea 100% funcional con librerías estándar de Next.js).*
+
+### 1. Procesamiento de Video con `FFmpeg.wasm` (C/Rust a WASM)
+* **Propósito**: Procesar, recortar o generar miniaturas (*thumbnails*) de videos subidos directamente desde el servidor Node.js o navegador cliente sin depender de binarios instalados en el sistema operativo.
+
+### 2. Desencriptación y Protección de Video (Rust + WASM)
+* **Propósito**: Proteger los videos contra descargas no autorizadas mediante streaming **HLS (`.m3u8`)** encriptado en AES-128.
+* **Implementación**: Un módulo compilado en **Rust (`wasm-bindgen`)** que ejecuta la desencriptación de fragmentos de video en memoria antes de alimentarlos al reproductor en el navegador.
+
+### 3. Reproductores de Streaming Adaptativo
+* **HLS.js / Shaka Player**: Integración con librerías de streaming que ajustan automáticamente la calidad de reproducción del video según el ancho de banda del usuario.
