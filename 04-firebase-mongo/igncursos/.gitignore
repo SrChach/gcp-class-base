@@ -1,0 +1,42 @@
+# ==========================================
+# igncursos - .gitignore
+# ==========================================
+
+# Dependencias
+/node_modules
+/.pnp
+.pnp.js
+.yarn/install-state.gz
+
+# Artefactos de Compilación y Next.js
+/.next/
+/out/
+/build
+*.tsbuildinfo
+next-env.d.ts
+
+# Entorno y Credenciales
+.env
+.env*.local
+*.pem
+
+# Archivos multimedia locales
+/media
+
+# Pruebas y Cobertura (Playwright / Vitest)
+/coverage
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+
+# Logs de depuración
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Archivos del sistema y editores
+.DS_Store
+/.idea/*
+!/.idea/runConfigurations
+.vercel

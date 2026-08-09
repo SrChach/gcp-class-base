@@ -20,6 +20,7 @@ Encontrarás los siguientes archivos dentro de este repositorio:
 *   [01-nginx-basic/Dockerfile](01-nginx-basic/Dockerfile): Un contenedor web estático simple basado en Nginx.
 *   [02-frontend-multi-stage/Dockerfile](02-frontend-multi-stage/Dockerfile): Una aplicación React + Vite que utiliza compilaciones multietapa para optimizar su peso.
 *   [03-backend-fastapi/Dockerfile](03-backend-fastapi/Dockerfile): Una API backend dinámica en Python y FastAPI.
+*   [04-firebase-mongo/README.md](04-firebase-mongo/README.md): Guía paso a paso para Firestore en modo MongoDB API, mongosh y Payload CMS en Cloud Run.
 *   [.gitignore](.gitignore): Archivo para excluir credenciales locales (como el archivo `.env`) del control de versiones.
 *   [build-and-push.sh](build-and-push.sh): Script de Bash para automatización opcional una vez dominados los pasos manuales.
 
@@ -128,6 +129,10 @@ graph TD
 ### Módulo 3: Backend con FastAPI (Python)
 *   **Ruta**: `03-backend-fastapi/Dockerfile`
 *   **Qué hace**: Levanta un backend dinámico en Python. Copia e instala las dependencias definidas en `requirements.txt` y expone el puerto `8000` para recibir consultas HTTP de la API definida en `main.py`.
+
+### Módulo 4: Firestore API MongoDB & Payload CMS (Cloud Run)
+*   **Ruta**: `04-firebase-mongo/README.md` y `04-firebase-mongo/payload-app/`
+*   **Qué hace**: Configura Firestore Enterprise en modo compatibilidad con la API de MongoDB, realiza pruebas de conexión con `mongosh` y despliega un contenedor de Payload CMS en Cloud Run que consume de Firestore.
 
 ---
 

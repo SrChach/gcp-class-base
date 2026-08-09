@@ -1,0 +1,28 @@
+services:
+  payload:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '3000:3000'
+    env_file:
+      - .env
+    restart: always
+
+  # NOTA: Como la aplicación se conecta a Firestore Database con la API de MongoDB
+  # (configurada en .env a través de la DATABASE_URL de Firestore),
+  # el contenedor local de mongo no es necesario.
+  #
+  # Si deseas usar un MongoDB local para pruebas fuera de Firestore,
+  # puedes descomentar el servicio a continuación y cambiar DATABASE_URL en .env a:
+  # mongodb://mongo:27017/mi-base-local
+  #
+  # mongo:
+  #   image: mongo:latest
+  #   ports:
+  #     - '27017:27017'
+  #   volumes:
+  #     - data:/data/db
+
+# volumes:
+#   data:
