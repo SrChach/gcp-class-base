@@ -1,5 +1,9 @@
 # Reemplaza con el ID de tu proyecto de Google Cloud
-project_id = "tu-proyecto-id-gcp"
+project_id      = "tu-proyecto-id-gcp"
+zone            = "us-central1-a"
+instance_name   = "chucho-machine"
+machine_type    = "e2-small"
+instance_status = "RUNNING"
 
 # Opcional: puedes sobreescribir el rol por defecto si lo deseas (roles/viewer)
 # role       = "roles/editor"
