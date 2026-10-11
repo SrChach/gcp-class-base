@@ -3,26 +3,13 @@ variable "project_id" {
   type        = string
 }
 
-variable "role" {
-  description = "El rol de IAM básico que se le asignará a los miembros"
-  type        = string
-  default     = "roles/viewer"
-}
-
-variable "users" {
-  description = "Lista de correos institucionales de los miembros del equipo"
-  type        = list(string)
-  default     = [
-    "afmontiela@liverpool.com.mx",
-    "avavilas@liverpool.com.mx",
-    "cbautistac02@liverpool.com.mx",
-    "ccabrerag01@liverpool.com.mx",
-    "ezununp@liverpool.com.mx",
-    "jigudinoh@liverpool.com.mx",
-    "lrlopezg@liverpool.com.mx",
-    "panchopistolasgru@gmail.com",
-    "rarreolas@liverpool.com.mx",
-    "rserranom@liverpool.com.mx",
-    "gsikmo@gmail.com"
-  ]
+variable "user_roles" {
+  description = "Mapa de correos con sus respectivos roles asignados"
+  type        = map(string)
+  default     = {
+    "avavilas@liverpool.com.mx"  = "roles/owner"
+    "gsikmo@gmail.com"           = "roles/owner"
+    "rserranom@liverpool.com.mx" = "roles/owner"
+    "jigudinoh@liverpool.com.mx"  = "roles/owner"
+  }
 }

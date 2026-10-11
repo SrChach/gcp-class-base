@@ -16,9 +16,9 @@ provider "google" {
 # Esto asegura que los nuevos usuarios se agreguen a la lista existente de permisos
 # y evita sobreescribir o eliminar los roles de otros usuarios/servicios del proyecto.
 resource "google_project_iam_member" "team_members" {
-  for_each = toset(var.users)
+  for_each = var.user_roles
 
   project = var.project_id
-  role    = var.role
-  member  = "user:${each.value}"
+  role    = each.value
+  member  = "user:${each.key}"
 }
